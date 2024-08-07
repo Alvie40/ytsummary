@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Download and summarize YouTube video subtitles"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
-packages = [{ include = "ytsummary" }]
+packages = [{ include = "ytsummary" }, { include = "ytvideo" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -16,14 +16,41 @@ setuptools = "^72.1.0"
 ruff = "^0.5.6"
 taskipy = "^1.13.0"
 pytest = "^8.3.2"
+pytest-cov = "^4.1.0"
+httpx = "^0.24.1"
+coverage = "^7.2.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.taskipy.tasks]
-test = "pytest"
-lint = "ruff check ."
-
 [tool.ruff]
-line-length = 88
+line-length = 79
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+preview = true
+select = ["I", "F", "E", "W", "PL", "PT"]
+
+[tool.ruff.format]
+preview = true
+quote-style = "single"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "-p no:warnings"
+
+[tool.taskipy.tasks]
+lint = "ruff check . && ruff check . --diff"
+format = "ruff check . --fix && ruff format ."
+run = "python -m ytsummary"
+pre_test = "task lint"
+test = "pytest -s -x --cov=ytsummary -vv"
+post_test = "coverage html"
+build = "poetry build"
+install = "poetry install"
+
+[tool.poetry.scripts]
+ytsummary = "ytsummary:main"
+ytvideo = "ytvideo:main"
+
